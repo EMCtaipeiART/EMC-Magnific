@@ -44,3 +44,9 @@ yarn-error.log*
 # OS metadata
 .DS_Store
 /dist-pages/
+
+.dev.vars
+cloudflare/.wrangler
+.wrangler
+/dist-cf
+/data
