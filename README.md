@@ -1,6 +1,8 @@
 # EMC Magnific 創作成本工作台
 
-線上使用：**https://emctaipeiart.github.io/EMC-Magnific/**
+線上使用：**https://emc-art.com/EMC-Magnific/**
+
+GitHub Pages 網址 https://emctaipeiart.github.io/EMC-Magnific/ 會導向帳號既有的自訂網域，已啟用 HTTPS。
 
 GitHub Pages 版本免登入，直接在瀏覽器匯入 CSV／JSON，整理 Magnific 的點數、生成規格、人員歸屬與專案成本。
 
