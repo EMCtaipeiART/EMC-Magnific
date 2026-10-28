@@ -9,7 +9,7 @@
     "@/lib/connectors": "./shims/connectors.ts"
   },
   "d1_databases": [
-    {"binding": "DB", "database_name": "emc-magnific", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "../drizzle"}
+    {"binding": "DB", "database_name": "emc-magnific", "database_id": "51d9fbb3-a03c-4591-8a52-412632c6c4f1", "migrations_dir": "../drizzle"}
   ],
   "triggers": {"crons": ["* * * * *"]},
   "observability": {"enabled": true}
