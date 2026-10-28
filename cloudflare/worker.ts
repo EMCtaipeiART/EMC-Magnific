@@ -1,6 +1,7 @@
 import {GET,POST} from '@/app/api/tracker/route';
 import {initAuth,startAuth,finishAuth,isConnected,disconnect} from './mcp';
 import {tick,getAuto,requestRun} from './sync-job';
+import {inScanWindow} from './window';
 import {getState,setState} from '@/lib/tracker/store';
 import {providerRead} from '@/lib/tracker/provider';
 export interface Env{DB:D1Database;ASSETS:Fetcher;ADMIN_PASSWORD:string;VIEW_PASSWORD?:string;SESSION_SECRET?:string}
@@ -59,13 +60,13 @@ export default {
       return req.method==='POST'?POST(req):GET(req);
     }
     if(path==='/thumb'&&req.method==='GET'){return thumb(req,url,ctx)}
-    if(path==='/auth/status'){const auto=await getAuto();return json({admin,connected:await isConnected(),scheduler:{running:auto.phase!=='idle',mode:auto.mode,lastOk:auto.lastOk,lastError:auto.lastError,page:auto.page,pages:auto.pages,processed:auto.processed}})}
+    if(path==='/auth/status'){const auto=await getAuto();return json({admin,connected:await isConnected(),scheduler:{inWindow:inScanWindow(),running:auto.phase!=='idle',mode:auto.mode,lastOk:auto.lastOk,lastError:auto.lastError,page:auto.page,pages:auto.pages,processed:auto.processed}})}
     if(path.startsWith('/auth/')){
       if(!admin)return json({error:'需要管理員權限。'},403);
       if(path==='/auth/start')return redirect(await startAuth());
-      if(path==='/auth/callback'){const code=url.searchParams.get('code');if(!code)return redirect('/?auth=denied');await finishAuth(code);await requestRun('full');ctx.waitUntil(tick());return redirect('/?connected=1')}
+      if(path==='/auth/callback'){const code=url.searchParams.get('code');if(!code)return redirect('/?auth=denied');await finishAuth(code);await requestRun('full',true);ctx.waitUntil(tick());return redirect('/?connected=1')}
       if(path==='/auth/disconnect'&&req.method==='POST'){await disconnect();return json({ok:true})}
-      if(path==='/auth/sync-now'&&req.method==='POST'){const r=await requestRun(url.searchParams.get('mode')==='full'?'full':'recent');if(r.started)ctx.waitUntil(tick());return json(r)}
+      if(path==='/auth/sync-now'&&req.method==='POST'){const r=await requestRun(url.searchParams.get('mode')==='full'?'full':'recent',true);if(r.started)ctx.waitUntil(tick());return json(r)}
     }
     return env.ASSETS.fetch(req);
   },

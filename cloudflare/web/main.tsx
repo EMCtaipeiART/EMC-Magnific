@@ -3,7 +3,7 @@ import {createRoot} from 'react-dom/client';
 import Dashboard from '@/app/tracker-dashboard';
 import '@/app/globals.css';
 import './admin.css';
-type Status={admin:boolean;connected:boolean;scheduler:{running:boolean;mode?:string;lastOk?:string;lastError?:string;page?:number;pages?:number;processed?:number}};
+type Status={admin:boolean;connected:boolean;scheduler:{inWindow?:boolean;running:boolean;mode?:string;lastOk?:string;lastError?:string;page?:number;pages?:number;processed?:number}};
 const fmt=(s?:string)=>s?new Date(s).toLocaleString('zh-TW',{hour12:false}):'尚未同步';
 function AdminBar(){
   const [st,setSt]=useState<Status|null>(null);
@@ -15,7 +15,7 @@ function AdminBar(){
   if(!st)return null;const s=st.scheduler;
   return <div className="admin-bar"><div className="admin-status">
     <span className={'dot '+(st.connected?(s.lastError?'warn':'ok'):'off')}/>
-    {!st.connected?'尚未連接 Magnific':s.running?`同步中… 第 ${s.page||0}${s.pages?` / ${s.pages}`:''} 批`:s.lastError?`同步失敗：${s.lastError}`:`上次自動同步：${fmt(s.lastOk)}`}
+    {!st.connected?'尚未連接 Magnific':s.running?`同步中… 第 ${s.page||0}${s.pages?` / ${s.pages}`:''} 批`:s.lastError?`同步失敗：${s.lastError}`:`上次自動同步：${fmt(s.lastOk)}`}<span className="muted">· 平日 08:00–20:00 每 10 分鐘自動掃描{s.inWindow?'':'（目前非掃描時段）'}</span>
     {!st.admin&&<span className="muted">· 唯讀</span>}
   </div><div className="admin-actions">
     {st.admin?<>

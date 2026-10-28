@@ -5,19 +5,23 @@ import {syncBatch,upgradeBatch,listFolders} from '@/lib/tracker/sync';
 import {getState,setState} from '@/lib/tracker/store';
 import {OWNER} from './shims/chatgpt-auth';
 import {isConnected} from './mcp';
-type Auto={phase:'idle'|'ref'|'sync'|'upgrade';mode?:'full'|'recent';runId?:string;anchor?:string;page?:number;pages?:number;processed?:number;refPage?:number;lockUntil?:number;lastRun?:string;lastOk?:string;lastError?:string;nextRecentAt?:number};
-const KEY='auto',BUDGET_MS=25000,RECENT_DAYS=3,INTERVAL_MS=60*60000;
+import {reclassifyAll} from './reclassify';
+import {inScanWindow} from './window';
+type Auto={phase:'idle'|'ref'|'sync'|'upgrade';mode?:'full'|'recent';runId?:string;anchor?:string;page?:number;pages?:number;processed?:number;refPage?:number;lockUntil?:number;lastRun?:string;lastOk?:string;lastError?:string;nextRecentAt?:number;manual?:boolean};
+const KEY='auto',BUDGET_MS=25000,RECENT_DAYS=3,INTERVAL_MS=10*60000;
 const taipei=(d:Date)=>new Date(d.getTime()+8*3600000).toISOString().slice(0,10);
 export const getAuto=async():Promise<Auto>=>({phase:'idle',...await getState(OWNER,KEY,{})});
 const put=(a:Auto)=>setState(OWNER,KEY,a);
-export async function requestRun(mode:'full'|'recent'){
+export async function requestRun(mode:'full'|'recent',manual=false){
   const a=await getAuto();if(a.phase!=='idle'&&(a.lockUntil||0)>Date.now())return {started:false,running:true};
-  await put({...a,phase:'ref',mode,runId:crypto.randomUUID(),anchor:new Date().toISOString(),page:1,pages:undefined,processed:0,refPage:1,lockUntil:0,lastRun:new Date().toISOString(),lastError:undefined});return {started:true};
+  await put({...a,phase:'ref',mode,manual,runId:crypto.randomUUID(),anchor:new Date().toISOString(),page:1,pages:undefined,processed:0,refPage:1,lockUntil:0,lastRun:new Date().toISOString(),lastError:undefined});return {started:true};
 }
 export async function tick(){
+  if(!(await reclassifyAll(Date.now()+20000)))return;
   if(!(await isConnected()))return;
   let a=await getAuto();const now=Date.now();
   if((a.lockUntil||0)>now)return;
+  if(!a.manual&&!inScanWindow(now))return;
   if(a.phase==='idle'){
     const first=!(await getState(OWNER,'sync',null));
     if(!first&&now<(a.nextRecentAt||0))return;

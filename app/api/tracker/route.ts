@@ -4,7 +4,7 @@ import {syncBatch,upgradeBatch,repriceBatch,listFolders,priceRecord} from '@/lib
 import {providerRead,ProviderError} from '@/lib/tracker/provider';
 import {DEFAULT_SETTINGS} from '@/lib/tracker/types';
 import type {CostRule,LedgerRecord,TrackerSettings} from '@/lib/tracker/types';
-import {tidy,finite,folderLineage} from '@/lib/tracker/domain';
+import {tidy,finite,folderLineage,classify,peopleOf,GENERIC_FOLDER} from '@/lib/tracker/domain';
 export const dynamic='force-dynamic';
 const reply=(data:any,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'private, no-store'}});
 async function audit(owner:string,entry:any){const list=await getState(owner,'audit',[]);list.unshift({at:new Date().toISOString(),...entry});await setState(owner,'audit',list.slice(0,1000))}
@@ -34,7 +34,7 @@ export async function POST(req:Request){
    const r=(await getRecords(owner,[tidy(b.id,100)]))[0];if(!r)return reply({error:'找不到作品。'},404);const before={person:r.person,costProject:r.costProject,credits:r.credits,creditSource:r.creditSource,note:r.note,workSummary:r.workSummary};
    if(typeof b.person==='string'&&b.person.trim()&&b.person.trim()!==r.person){r.person=tidy(b.person,100);r.personSource='manual'}
    if(typeof b.costProject==='string'&&b.costProject.trim()&&b.costProject.trim()!==r.costProject){r.costProject=tidy(b.costProject,200);r.costProjectSource='manual'}
-   if(b.resetAttribution){const folders=await getState(owner,'folders',[]),settings=await getState(owner,'settings',DEFAULT_SETTINGS),lineage=folderLineage(r.folder,r.project,folders);const person=settings.projectPeople?.[r.project]||lineage.root?.name||'';r.person=person&&!/^personal( project)?$/i.test(person)?person:r.author||'未指定';r.personSource=person&&!/^personal( project)?$/i.test(person)?'personal-project':r.author?'author':'unknown';r.costProject=lineage.business?.name||'未分類工作專案';r.costProjectSource=lineage.business?'folder':'unassigned'}
+   if(b.resetAttribution){const folders=await getState(owner,'folders',[]),settings=await getState(owner,'settings',DEFAULT_SETTINGS),lineage=folderLineage(r.folder,r.project,folders),personal=settings.projectPeople?.[r.project]||lineage.root?.name||'',inferred=personal&&!GENERIC_FOLDER.test(personal)?personal:'',cls=classify(lineage,inferred,peopleOf(folders,settings)),assigned=inferred||cls.folderPerson;r.person=assigned||r.author||'未指定';r.personSource=assigned?'personal-project':r.author?'author':'unknown';r.costProject=cls.business?.name||'未分類工作專案';r.costProjectSource=cls.business?'folder':'unassigned'}
    r.note=tidy(b.note,2000);r.workSummary=tidy(b.workSummary,2000);
    if(b.creditMode&&r.creditSource!=='provider'){
     if(b.creditMode==='automatic'){r.credits=null;r.creditSource='unknown';const rules=await getState(owner,'rules',[]);Object.assign(r,await priceRecord(owner,r,rules,new Map(),false))}

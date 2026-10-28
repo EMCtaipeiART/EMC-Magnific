@@ -7,12 +7,22 @@ export function taipeiDay(value:string){const t=new Date(value).getTime();if(!Nu
 export function tidy(value:unknown,max=500){return typeof value==='string'?value.trim().slice(0,max):''}
 export function safeWebUrl(value:unknown){try{const u=new URL(String(value));return u.protocol==='https:'&&['www.magnific.com','magnific.com','www.freepik.com'].includes(u.hostname)?u.toString():''}catch{return ''}}
 export function folderLineage(folder:string,project:string,folders:FolderInfo[]){const byId=new Map(folders.map(f=>[f.reference,f]));const path:FolderInfo[]=[];const seen=new Set<string>();let id=folder;while(id&&!seen.has(id)){seen.add(id);const f=byId.get(id);if(!f)break;path.unshift(f);if(id===project)break;id=f.parentReference||''}const root=byId.get(project);if(root&&!path.some(f=>f.reference===project))path.unshift(root);const business=path.find(f=>f.reference!==project);return {path,business,root}}
+export const GENERIC_FOLDER=/^(personal( project)?|team project|default( project)?)$/i;
+/** Person folders are the root projects; client work projects are the folders directly below a person's root. */
+export function peopleOf(folders:FolderInfo[],settings?:TrackerSettings){return new Set([...folders.filter(f=>f.reference&&['project','project_default'].includes(f.type)).map(f=>f.name),...Object.values(settings?.projectPeople||{})].filter(n=>n&&!GENERIC_FOLDER.test(n)))}
+export function classify(lineage:ReturnType<typeof folderLineage>,assigned:string,people:Set<string>){
+ const below=lineage.path.filter(f=>f.reference!==lineage.root?.reference);
+ const folderPerson=!assigned&&below[0]&&people.has(below[0].name)?below[0].name:'';
+ const rest=folderPerson?below.slice(1):below;
+ const business=rest.find(f=>!GENERIC_FOLDER.test(f.name)&&!people.has(f.name));
+ return {folderPerson,business};
+}
 export function normalize(raw:any,lean:any,old:Partial<LedgerRecord>|undefined,folders:FolderInfo[],settings:TrackerSettings,models:Map<string,any>,now:string):LedgerRecord{
  const m=raw.metadata||{},project=raw.projectReference||lean?.projectReference||old?.project||'',folder=raw.folderReference||lean?.folderReference||old?.folder||project;
  const lineage=folderLineage(folder,project,folders),rootName=lineage.root?.name||old?.personalProjectName||'';
  const author=tidy(raw.author?.name||lean?.author?.name||old?.author,200);
  const personalName=tidy(settings.projectPeople?.[project]||rootName,100);
- const inferredPerson=personalName&&!/^personal( project)?$/i.test(personalName)?personalName:'';
+ const inferredPerson=personalName&&!GENERIC_FOLDER.test(personalName)?personalName:'',cls=classify(lineage,inferredPerson,peopleOf(folders,settings)),assignedPerson=inferredPerson||cls.folderPerson;
  const modelSlug=tidy(m.slug||m.mode||m.model,160),catalog=models.get(modelSlug),kind=raw.kind||(/video/.test(raw.tool)?'video':/audio|speech|music/.test(raw.tool)?'audio':'image');
  const original=(Array.isArray(m.mediaCollection)?m.mediaCollection:[]).find((x:any)=>x.type==='original')||{};
  const previous=tidy(m.previous||m.sourceCreationIdentifier||m.creationIdentifier,100);
@@ -25,8 +35,8 @@ export function normalize(raw:any,lean:any,old:Partial<LedgerRecord>|undefined,f
  const data:LedgerRecord={
  version:DATA_VERSION,id:raw.identifier,name:tidy(raw.name||lean?.name||old?.name||m.inputPrompt||m.prompt||'未命名作品',1000),prompt:tidy(m.inputPrompt||m.prompt||lean?.prompt||old?.prompt,6000),tool:raw.tool||lean?.tool||old?.tool||'',kind,status:raw.status||old?.status||'unknown',createdAt:raw.createdAt||old?.createdAt||'',day:taipeiDay(raw.createdAt||old?.createdAt||''),family:raw.family||old?.family,
  project,folder,personalProjectName:rootName,folderName:lineage.path.at(-1)?.name||old?.folderName||'',folderPath:lineage.path.map(f=>f.name).join(' / '),folderAncestors:lineage.path.map(f=>f.reference),
- costProject:old?.costProjectSource==='manual'?old.costProject||'':lineage.business?.name||'未分類工作專案',costProjectSource:old?.costProjectSource==='manual'?'manual':lineage.business?'folder':'unassigned',
- person:old?.personSource==='manual'?old.person||'未指定':inferredPerson||author||'未指定',personSource:old?.personSource==='manual'?'manual':inferredPerson?'personal-project':author?'author':'unknown',author:author||'平台未提供',authorId:raw.author?.id||lean?.author?.id||old?.authorId,
+ costProject:old?.costProjectSource==='manual'?old.costProject||'':cls.business?.name||'未分類工作專案',costProjectSource:old?.costProjectSource==='manual'?'manual':cls.business?'folder':'unassigned',
+ person:old?.personSource==='manual'?old.person||'未指定':assignedPerson||author||'未指定',personSource:old?.personSource==='manual'?'manual':assignedPerson?'personal-project':author?'author':'unknown',author:author||'平台未提供',authorId:raw.author?.id||lean?.author?.id||old?.authorId,
  model:tidy(m.model||m.mode||modelSlug,160),modelSlug,modelName:tidy(m.modelName||catalog?.name||m.model||m.mode||raw.tool,160),mode:tidy(m.mode,100),provider:tidy(m.api||catalog?.api,100),duration:finite(m.duration??m.durationSeconds),actualDuration:finite(original.duration??m.exactDuration??((finite(m.frameCount)&&finite(m.exactFps??m.fps))?Number(m.frameCount)/Number(m.exactFps??m.fps):m.duration)),
  width:keptDimensions?old.width??width:width,height:keptDimensions?old.height??height:height,reportedWidth:width,reportedHeight:height,dimensionsSource:keptDimensions?'file':width&&height?'metadata':'missing',resolution:tidy(m.resolution,50),aspectRatio:tidy(m.aspectRatio||catalog?.aspectRatio,50),fps:finite(original.exactFps??m.exactFps??m.fps),frameCount:finite(original.frameCount??m.frameCount),withSoundEffects:typeof m.withSoundEffects==='boolean'?m.withSoundEffects:null,noMusic:typeof m.noMusic==='boolean'?m.noMusic:null,quality:tidy(m.quality,50),variant:tidy(m.variant,80),tier:tidy(m.tier,50),seed:String(m.seed??''),codec:tidy(original.codec||m.originalCodec,100),previous,sourceWidth:finite(m.sourceWidth??m.inputWidth),sourceHeight:finite(m.sourceHeight??m.inputHeight),scale:tidy(m.scale||(/^\d+x$/.test(m.resolution||'')?m.resolution:''),20),referenceCounts:refCounts,spec:sourceSpec,
  credits:recordedCredits??old?.credits??null,creditSource:recordedCredits!==null?'provider':old?.creditSource||'unknown',providerCreditField:recordedCredits!==null?(finite(raw.credits)!==null?'credits':'metadata.credits'):old?.providerCreditField,quote:recordedCredits!==null?null:old?.quote||null,pricingError:recordedCredits!==null?'':old?.pricingError||'',note:old?.note||'',workSummary:old?.workSummary||'',syncedAt:now,changedAt:old?.changedAt,webUrl:safeWebUrl(raw.webUrl||old?.webUrl)
