@@ -1,0 +1,8 @@
+services:
+  tracker:
+    build: .
+    env_file: .env
+    ports: ["8080:8080"]
+    volumes:
+      - ./data:/data   # Synology 上改成共用資料夾路徑，如 /volume1/docker/magnific
+    restart: unless-stopped
