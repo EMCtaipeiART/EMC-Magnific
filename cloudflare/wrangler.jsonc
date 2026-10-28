@@ -11,6 +11,8 @@
   "d1_databases": [
     {"binding": "DB", "database_name": "emc-magnific", "database_id": "51d9fbb3-a03c-4591-8a52-412632c6c4f1", "migrations_dir": "../drizzle"}
   ],
+  "routes": [{"pattern": "magnific.emc-art.com", "custom_domain": true}],
+  "workers_dev": true,
   "triggers": {"crons": ["* * * * *"]},
   "observability": {"enabled": true}
 }

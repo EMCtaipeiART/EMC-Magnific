@@ -2,6 +2,7 @@ import {GET,POST} from '@/app/api/tracker/route';
 import {initAuth,startAuth,finishAuth,isConnected,disconnect} from './mcp';
 import {tick,getAuto,requestRun} from './sync-job';
 import {getState,setState} from '@/lib/tracker/store';
+import {providerRead} from '@/lib/tracker/provider';
 export interface Env{DB:D1Database;ASSETS:Fetcher;ADMIN_PASSWORD:string;VIEW_PASSWORD?:string;SESSION_SECRET?:string}
 type Role='admin'|'viewer';
 const enc=new TextEncoder(),b64=(buf:ArrayBuffer)=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -26,6 +27,23 @@ async function login(req:Request,env:Env){
   await setState('login',key,{n:0,until:0});
   return redirect('/',{'Set-Cookie':await makeCookie(env,role,new URL(req.url).protocol==='https:')});
 }
+
+/** Thumbnails are fetched with a fresh signed URL on demand and cached at the edge for a day. */
+async function thumb(req:Request,url:URL,ctx:ExecutionContext):Promise<Response>{
+  const id=url.searchParams.get('id')||'',preview=url.searchParams.get('v')==='preview';
+  if(!/^[A-Za-z0-9_-]{4,40}$/.test(id))return new Response('bad id',{status:400});
+  const cache=(caches as any).default as Cache,key=new Request(`https://thumb.invalid/${id}/${preview?'p':'t'}`);
+  const hit=await cache.match(key);if(hit)return hit;
+  let raw:any;try{raw=((await providerRead('creations_get',{identifiers:[id]})).creations||[])[0]}catch{return new Response('unavailable',{status:502})}
+  const src=String((preview?raw?.previewUrl||raw?.thumbnailUrl:raw?.thumbnailUrl||raw?.previewUrl)||(raw?.kind==='video'?'':raw?.url)||'');
+  let u:URL;try{u=new URL(src)}catch{return new Response('no thumbnail',{status:404})}
+  if(u.protocol!=='https:'||!/(^|\.)cdnpk\.net$/.test(u.hostname))return new Response('blocked',{status:404});
+  const up=await fetch(u.toString(),{redirect:'manual'});
+  const type=up.headers.get('Content-Type')||'';
+  if(!up.ok||!/^image\//.test(type)||Number(up.headers.get('Content-Length')||0)>6e6)return new Response('no thumbnail',{status:404});
+  const res=new Response(up.body,{headers:{'Content-Type':type,'Cache-Control':'public, max-age=86400','X-Content-Type-Options':'nosniff'}});
+  ctx.waitUntil(cache.put(key,res.clone()));return res;
+}
 export default {
   async fetch(req:Request,env:Env,ctx:ExecutionContext):Promise<Response>{
     const url=new URL(req.url),path=url.pathname;
@@ -40,6 +58,7 @@ export default {
       if(req.method==='POST'&&!admin)return json({error:'唯讀模式：只有管理員可以修改或同步。'},403);
       return req.method==='POST'?POST(req):GET(req);
     }
+    if(path==='/thumb'&&req.method==='GET'){return thumb(req,url,ctx)}
     if(path==='/auth/status'){const auto=await getAuto();return json({admin,connected:await isConnected(),scheduler:{running:auto.phase!=='idle',mode:auto.mode,lastOk:auto.lastOk,lastError:auto.lastError,page:auto.page,pages:auto.pages,processed:auto.processed}})}
     if(path.startsWith('/auth/')){
       if(!admin)return json({error:'需要管理員權限。'},403);
