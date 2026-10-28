@@ -8,8 +8,8 @@ import {isConnected} from './mcp';
 import {reclassifyAll} from './reclassify';
 import {inScanWindow} from './window';
 type Auto={phase:'idle'|'ref'|'sync'|'upgrade';mode?:'full'|'recent';runId?:string;anchor?:string;page?:number;pages?:number;processed?:number;refPage?:number;lockUntil?:number;lastRun?:string;lastOk?:string;lastError?:string;nextRecentAt?:number;manual?:boolean;scopeStart?:string};
-/** Creations before this Taipei date are never synced (everything before October of last year). */
-export const SYNC_START='2025-10-01';
+/** Creations before this Taipei date are history and are never back-filled; only newer work is synced. */
+export const SYNC_START='2026-10-28';
 const KEY='auto',BUDGET_MS=25000,RECENT_DAYS=3,INTERVAL_MS=10*60000;
 const taipei=(d:Date)=>new Date(d.getTime()+8*3600000).toISOString().slice(0,10);
 export const getAuto=async():Promise<Auto>=>({phase:'idle',...await getState(OWNER,KEY,{})});

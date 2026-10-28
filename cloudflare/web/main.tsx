@@ -19,7 +19,7 @@ function AdminBar(){
     {!st.admin&&<span className="muted">· 唯讀</span>}
   </div><div className="admin-actions">
     {st.admin?<>
-      {st.connected?<><button disabled={s.running} onClick={()=>post('/auth/sync-now')}>立即同步</button><button disabled={s.running} onClick={()=>confirm('重新讀取全部歷史紀錄，可能需要數分鐘。繼續？')&&post('/auth/sync-now?mode=full')}>完整重新同步</button><button onClick={()=>confirm('中斷與 Magnific 的連線？已存的紀錄會保留。')&&post('/auth/disconnect')}>中斷連接</button></>:<a className="primary" href="/auth/start">連接 Magnific</a>}
+      {st.connected?<><button disabled={s.running} onClick={()=>post('/auth/sync-now')}>立即同步</button><button disabled={s.running} onClick={()=>confirm('重新讀取 2026-10-28 起的紀錄（更早的歷史紀錄不會補抓，已存的保留）。繼續？')&&post('/auth/sync-now?mode=full')}>重新同步（自 10/28 起）</button><button onClick={()=>confirm('中斷與 Magnific 的連線？已存的紀錄會保留。')&&post('/auth/disconnect')}>中斷連接</button></>:<a className="primary" href="/auth/start">連接 Magnific</a>}
     </>:null}
     <a href="/logout">登出</a>
   </div>
