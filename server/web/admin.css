@@ -1,0 +1,12 @@
+.admin-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 20px;background:#edf2e6;border-bottom:1px solid #d5dccb;font-size:12px}
+.admin-status{display:flex;align-items:center;gap:8px}.admin-status .muted{color:#6b7468}
+.dot{width:8px;height:8px;border-radius:50%;background:#aaa}.dot.ok{background:#2e8a5b}.dot.warn{background:#d49a1a}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+.admin-bar button,.admin-bar a{font:inherit;padding:4px 12px;border:1px solid #b9c3ae;border-radius:6px;background:#fff;color:#222;cursor:pointer;text-decoration:none}
+.admin-bar .primary,.admin-modal .primary{background:#2e6a50;color:#fff;border-color:#2e6a50}.admin-bar button:disabled{opacity:.5;cursor:default}
+.admin-modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:grid;place-items:center;z-index:100}
+.admin-modal form{background:#fff;padding:24px;border-radius:12px;width:min(360px,90vw);display:grid;gap:12px}
+.admin-modal h3{margin:0}.admin-modal p{margin:0;color:#555}.admin-modal input{padding:8px 10px;border:1px solid #bbb;border-radius:6px;font:inherit}
+.admin-modal .err{color:#b3261e}.admin-modal div{display:flex;gap:8px;justify-content:flex-end}
+.admin-modal button{font:inherit;padding:6px 14px;border:1px solid #bbb;border-radius:6px;background:#fff;cursor:pointer}
+html[data-readonly="1"] [data-write]{display:none!important}

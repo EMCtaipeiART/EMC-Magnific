@@ -14,11 +14,14 @@
     "db:generate": "drizzle-kit generate",
     "dev:pages": "vite --config vite.pages.config.ts",
     "build:pages": "vite build --config vite.pages.config.ts",
-    "test": "node --import tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test tests/*.test.ts",
+    "build:server": "vite build --config vite.server.config.ts && node scripts/build-server.mjs",
+    "start:nas": "node dist-server/server.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@hookform/resolvers": "^5.7.1",
+    "@modelcontextprotocol/sdk": "^1.17.5",
     "@shadcn/react": "^0.3.0",
     "@toon-format/toon": "^4.4.0",
     "class-variance-authority": "0.7.1",

@@ -32,6 +32,10 @@ GitHub Pages 版本免登入，直接在瀏覽器匯入 CSV／JSON，整理 Magn
 
 JSON 備份格式：`{format: "emc-magnific-ledger", version: 1, records: [...], state: {...}, audit: [...]}`。還原時可選擇同時還原成本設定、費率與修改紀錄。一次最多 25 MB、100,000 筆，格式錯誤時不寫入資料。
 
+## NAS 版（自動同步）
+
+放在 NAS 的 Docker 版會透過 Magnific 官方 MCP 授權，自動讀取作品紀錄；同事用瀏覽器唯讀查看。安裝見 [docs/NAS.md](docs/NAS.md)。
+
 ## 本機開發
 
 Node.js 22.13 以上：
