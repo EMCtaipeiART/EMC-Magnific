@@ -1,4 +1,4 @@
-import csv, io, os, secrets, threading, time
+import csv, html, io, os, secrets, threading, time
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, Response
@@ -35,9 +35,17 @@ def start(): threading.Thread(target=_loop, daemon=True).start()
 def home():
     with conn() as c:
         snaps = c.execute("SELECT * FROM balance_snapshots ORDER BY id DESC LIMIT 30").fetchall()
-    rows = "".join(f"<tr><td>{s['taken_at']}</td><td>{s['balance']:,.0f}</td></tr>" for s in snaps)
+        gens = c.execute("SELECT * FROM generations ORDER BY created_at DESC LIMIT 100").fetchall()
+    e = html.escape
+    srows = "".join(f"<tr><td>{e(s['taken_at'])}</td><td>{s['balance']:,.0f}</td></tr>" for s in snaps)
+    grows = "".join(
+        f"<tr><td>{e(g['created_at'] or '')}</td><td>{e(g['tool'] or '')}</td><td>{g['credits'] or 0:,.0f}</td>"
+        f"<td>{e(g['person'])}</td><td>{e(g['project'])}</td><td>{e((g['prompt'] or '')[:80])}</td></tr>"
+        for g in gens)
     return f"<h1>Magnific 點數追蹤</h1><p><a href='/export.csv'>匯出 CSV（可匯入帳本）</a></p>" \
-           f"<table border=1 cellpadding=6><tr><th>時間(UTC)</th><th>餘額</th></tr>{rows}</table>"
+           f"<h2>餘額紀錄</h2><table border=1 cellpadding=6><tr><th>時間(UTC)</th><th>餘額</th></tr>{srows}</table>" \
+           f"<h2>最近生成（100 筆）</h2><table border=1 cellpadding=6><tr><th>時間</th><th>工具</th><th>點數</th>" \
+           f"<th>人員</th><th>專案</th><th>內容</th></tr>{grows}</table>"
 
 @app.get("/export.csv", dependencies=[Depends(auth)])
 def export():
