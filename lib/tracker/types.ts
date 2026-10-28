@@ -1,0 +1,133 @@
+export type CreditSource = 'provider' | 'manual' | 'calculated' | 'rule' | 'estimate' | 'range' | 'unknown' | 'free';
+export type MediaKind = 'image' | 'video' | 'audio' | 'other';
+export interface PriceQuote {
+  key: string;
+  tool: string;
+  args: Record<string, unknown>;
+  at: string;
+  certainty: 'exact' | 'variable' | 'unsupported';
+  credits: number | null;
+  range?: { min?: number; max?: number };
+  reason?: string;
+  isUnlimited?: boolean;
+  formula: string;
+  ruleId?: string;
+  ruleVersion?: string;
+}
+export interface LedgerRecord {
+  version: number;
+  id: string;
+  name: string;
+  prompt: string;
+  tool: string;
+  kind: MediaKind;
+  status: string;
+  createdAt: string;
+  day: string;
+  family?: string;
+  project: string;
+  folder: string;
+  personalProjectName: string;
+  folderName: string;
+  folderPath: string;
+  folderAncestors: string[];
+  costProject: string;
+  costProjectSource: 'folder' | 'manual' | 'unassigned';
+  person: string;
+  personSource: 'author' | 'personal-project' | 'manual' | 'unknown';
+  author: string;
+  authorId?: string;
+  model: string;
+  modelSlug: string;
+  modelName: string;
+  mode: string;
+  provider: string;
+  duration: number | null;
+  actualDuration: number | null;
+  width: number | null;
+  height: number | null;
+  reportedWidth: number | null;
+  reportedHeight: number | null;
+  dimensionsSource: 'file' | 'metadata' | 'missing';
+  resolution: string;
+  aspectRatio: string;
+  fps: number | null;
+  frameCount: number | null;
+  withSoundEffects: boolean | null;
+  noMusic: boolean | null;
+  quality: string;
+  variant: string;
+  tier: string;
+  seed: string;
+  codec: string;
+  previous: string;
+  sourceWidth: number | null;
+  sourceHeight: number | null;
+  scale: string;
+  referenceCounts: Record<string, number>;
+  spec: Record<string, unknown>;
+  credits: number | null;
+  creditSource: CreditSource;
+  providerCreditField?: string;
+  quote: PriceQuote | null;
+  pricingError: string;
+  note: string;
+  workSummary: string;
+  syncedAt: string;
+  changedAt?: string;
+  webUrl: string;
+}
+export interface FolderInfo {
+  reference: string;
+  name: string;
+  type: string;
+  parentReference?: string | null;
+  projectReference?: string;
+}
+export interface CostRule {
+  id: string;
+  label: string;
+  tool: string;
+  modelSlug: string;
+  resolution: string;
+  quality: string;
+  variant: string;
+  sound: 'any' | 'on' | 'off';
+  duration: number | null;
+  start: string;
+  end: string;
+  unit: 'creation' | 'second';
+  rate: number;
+  note: string;
+  enabled: boolean;
+  updatedAt: string;
+}
+export interface TrackerSettings {
+  currency: string;
+  costPer1000: number | null;
+  projectPeople: Record<string, string>;
+}
+export interface FilterValues {
+  start: string;
+  end: string;
+  person: string;
+  author: string;
+  project: string;
+  costProject: string;
+  folder: string;
+  descendants: string;
+  kind: string;
+  model: string;
+  resolution: string;
+  status: string;
+  source: string;
+  minSeconds: string;
+  maxSeconds: string;
+  search: string;
+}
+export const EMPTY_FILTERS: FilterValues = {start:'',end:'',person:'',author:'',project:'',costProject:'',folder:'',descendants:'true',kind:'',model:'',resolution:'',status:'',source:'',minSeconds:'',maxSeconds:'',search:''};
+export const DEFAULT_SETTINGS: TrackerSettings = {currency:'TWD',costPer1000:null,projectPeople:{}};
+export const KIND_LABELS: Record<string,string> = {image:'照片',video:'影片',audio:'音訊',other:'其他'};
+export const SOURCE_LABELS: Record<string,string> = {provider:'平台作品點數',manual:'人工核實',calculated:'官方規則回算',rule:'自訂費率回算',estimate:'人工估算',range:'費率區間',unknown:'規格待查',free:'免費操作'};
+export const PERSON_LABELS: Record<string,string> = {author:'平台建立者',manual:'人工歸屬','personal-project':'個人專案歸屬',unknown:'身分未確認'};
+export const OP_LABELS: Record<string,string> = {'text-to-image':'圖片生成','video-generator':'影片生成','video-modify':'影片編輯',enhance:'圖片放大／增強','video-upscale':'影片放大','remove-background':'去背',retouch:'局部修圖',reimagine:'重繪',expand:'延展'};

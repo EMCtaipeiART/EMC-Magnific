@@ -1,0 +1,19 @@
+{
+  "d1": "DB",
+  "r2": null,
+  "project_id": "appgprj_6ae149a4fc388191bc1c74a94fae5559",
+  "plugins": [
+    {
+      "id": "plugin_asdk_app_6a1f227d5a848191ae3317c66947b440",
+      "connector_ids": [
+        "asdk_app_6a1f227d5a848191ae3317c66947b440"
+      ]
+    }
+  ],
+  "connectors": [
+    {
+      "id": "asdk_app_6a1f227d5a848191ae3317c66947b440",
+      "action_selection_mode": "read_only"
+    }
+  ]
+}
