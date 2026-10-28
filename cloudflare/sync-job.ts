@@ -7,6 +7,7 @@ import {OWNER} from './shims/chatgpt-auth';
 import {isConnected} from './mcp';
 import {reclassifyAll} from './reclassify';
 import {inScanWindow} from './window';
+import {bumpDataVersion} from './data-version';
 type Auto={phase:'idle'|'ref'|'sync'|'upgrade';mode?:'full'|'recent';runId?:string;anchor?:string;page?:number;pages?:number;processed?:number;refPage?:number;lockUntil?:number;lastRun?:string;lastOk?:string;lastError?:string;nextRecentAt?:number;manual?:boolean;scopeStart?:string};
 /** Creations before this Taipei date are history and are never back-filled; only newer work is synced. */
 export const SYNC_START='2026-10-28';
@@ -53,5 +54,5 @@ export async function tick(){
     a.lastError=e instanceof ProviderError&&fatalProviderError(e)?e.message:String(e?.message||e).slice(0,300);console.error('[sync]',a.lastError);
     if(e instanceof ProviderError&&fatalProviderError(e)){a.phase='idle';a.nextRecentAt=Date.now()+INTERVAL_MS}
   }
-  a.lockUntil=0;await put(a);
+  a.lockUntil=0;await put(a);await bumpDataVersion();
 }

@@ -2,6 +2,7 @@ import {GET,POST} from '@/app/api/tracker/route';
 import {initAuth,startAuth,finishAuth,isConnected,disconnect} from './mcp';
 import {tick,getAuto,requestRun} from './sync-job';
 import {inScanWindow} from './window';
+import {dataVersion,bumpDataVersion} from './data-version';
 import {getState,setState} from '@/lib/tracker/store';
 import {providerRead} from '@/lib/tracker/provider';
 export interface Env{DB:D1Database;ASSETS:Fetcher;ADMIN_PASSWORD:string;VIEW_PASSWORD?:string;SESSION_SECRET?:string}
@@ -29,6 +30,16 @@ async function login(req:Request,env:Env){
   return redirect('/',{'Set-Cookie':await makeCookie(env,role,new URL(req.url).protocol==='https:')});
 }
 
+
+/** Ledger API responses are identical for every signed-in viewer, so cache them per data version. */
+async function ledgerGet(req:Request,url:URL,ctx:ExecutionContext):Promise<Response>{
+  const cache=(caches as any).default as Cache,key=new Request(`https://ledger.invalid/${await dataVersion()}?${url.searchParams.toString()}`);
+  const hit=await cache.match(key);if(hit)return new Response(hit.body,{headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store','X-Cache':'HIT'}});
+  const res=await GET(req);if(!res.ok)return res;
+  const body=await res.text();
+  ctx.waitUntil(cache.put(key,new Response(body,{headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'public, max-age=900'}})));
+  return new Response(body,{headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store','X-Cache':'MISS'}});
+}
 /** Thumbnails are fetched with a fresh signed URL on demand and cached at the edge for a day. */
 async function thumb(req:Request,url:URL,ctx:ExecutionContext):Promise<Response>{
   const id=url.searchParams.get('id')||'',preview=url.searchParams.get('v')==='preview';
@@ -57,7 +68,8 @@ export default {
     await initAuth(url.origin);
     if(path==='/api/tracker'){
       if(req.method==='POST'&&!admin)return json({error:'唯讀模式：只有管理員可以修改或同步。'},403);
-      return req.method==='POST'?POST(req):GET(req);
+      if(req.method==='POST'){const r=await POST(req);if(r.ok)await bumpDataVersion();return r}
+      return url.searchParams.has('record')?GET(req):ledgerGet(req,url,ctx);
     }
     if(path==='/thumb'&&req.method==='GET'){return thumb(req,url,ctx)}
     if(path==='/auth/status'){const auto=await getAuto();return json({admin,connected:await isConnected(),scheduler:{inWindow:inScanWindow(),running:auto.phase!=='idle',mode:auto.mode,lastOk:auto.lastOk,lastError:auto.lastError,page:auto.page,pages:auto.pages,processed:auto.processed}})}

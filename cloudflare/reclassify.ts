@@ -5,6 +5,7 @@ import {classify,folderLineage,GENERIC_FOLDER,peopleOf} from '@/lib/tracker/doma
 import {DEFAULT_SETTINGS} from '@/lib/tracker/types';
 import type {LedgerRecord} from '@/lib/tracker/types';
 import {OWNER} from './shims/chatgpt-auth';
+import {bumpDataVersion} from './data-version';
 const CLASSIFY_VERSION=1;
 export async function reclassifyAll(deadline:number):Promise<boolean>{
   if((await getState(OWNER,'classifyV',0))>=CLASSIFY_VERSION)return true;
@@ -12,7 +13,7 @@ export async function reclassifyAll(deadline:number):Promise<boolean>{
   let cursor:string=await getState(OWNER,'classifyCursor','');
   while(Date.now()<deadline){
     const rows=await db().prepare('SELECT data FROM records WHERE owner=? AND id>? ORDER BY id LIMIT 300').bind(OWNER,cursor).all();
-    if(!rows.results.length){await setState(OWNER,'classifyV',CLASSIFY_VERSION);await setState(OWNER,'classifyCursor','');return true}
+    if(!rows.results.length){await setState(OWNER,'classifyV',CLASSIFY_VERSION);await bumpDataVersion();await setState(OWNER,'classifyCursor','');return true}
     const records:LedgerRecord[]=rows.results.map((r:any)=>JSON.parse(r.data)),changed:LedgerRecord[]=[];
     for(const r of records){
       const lineage=folderLineage(r.folder,r.project,folders),rootName=lineage.root?.name||r.personalProjectName||'',personalName=settings.projectPeople?.[r.project]||rootName,inferred=personalName&&!GENERIC_FOLDER.test(personalName)?personalName:'',cls=classify(lineage,inferred,people);
