@@ -82,6 +82,14 @@ export async function upgradeBatch(owner:string){
  const count=await db().prepare("SELECT COUNT(*) AS n FROM records WHERE owner=? AND COALESCE(json_extract(data,'$.tool'),'') NOT LIKE '%upload%' AND COALESCE(json_extract(data,'$.version'),0)<?").bind(owner,DATA_VERSION).first<any>();
  return {count:result.records.length,remaining:count?.n||0,done:!count?.n,stalled:result.records.length===0,warnings:result.warnings,pricing:result.pricing};
 }
+// Records moved into a client folder after they were synced keep their old (unassigned) attribution; re-read them so the folder shows up.
+export async function refreshUnassignedBatch(owner:string,cursor=''){
+ const rows=await db().prepare("SELECT id FROM records WHERE owner=? AND id>? AND g_costProjectSource='unassigned' ORDER BY id LIMIT ?").bind(owner,cursor,BATCH).all();
+ const ids=rows.results.map((r:any)=>String(r.id));if(!ids.length)return {done:true,cursor:'',count:0};
+ const data=await providerRead('creations_get',{identifiers:ids}),raws=data.creations||data.items||[];
+ const result=await enrich(owner,raws,[],false);
+ return {done:ids.length<BATCH,cursor:ids.at(-1)!,count:result.records.length};
+}
 export async function repriceBatch(owner:string,b:any){
  const cursor=tidy(b.cursor,100),rules:CostRule[]=await getState(owner,'rules',[]),pending=new Map<string,Promise<PriceQuote>>();
  const rows=await db().prepare('SELECT data FROM records WHERE owner=? AND id>? ORDER BY id LIMIT ?').bind(owner,cursor,BATCH).all();

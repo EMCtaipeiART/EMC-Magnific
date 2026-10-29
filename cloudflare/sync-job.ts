@@ -1,14 +1,14 @@
 // Resumable background sync driven by a cron trigger (and "立即同步"). Each tick advances within a time budget;
 // progress is saved in D1 so a run can span many invocations.
 import {providerRead,ProviderError,fatalProviderError} from '@/lib/tracker/provider';
-import {syncBatch,upgradeBatch,listFolders} from '@/lib/tracker/sync';
+import {syncBatch,upgradeBatch,listFolders,refreshUnassignedBatch} from '@/lib/tracker/sync';
 import {db,getState,setState} from '@/lib/tracker/store';
 import {OWNER} from './shims/chatgpt-auth';
 import {isConnected} from './mcp';
 import {reclassifyAll} from './reclassify';
 import {inScanWindow} from './window';
 import {bumpDataVersion} from './data-version';
-type Auto={phase:'idle'|'ref'|'sync'|'upgrade';mode?:'full'|'recent';runId?:string;anchor?:string;page?:number;pages?:number;processed?:number;refPage?:number;lockUntil?:number;lastRun?:string;lastOk?:string;lastError?:string;nextRecentAt?:number;manual?:boolean;scopeStart?:string;fails?:number};
+type Auto={phase:'idle'|'ref'|'sync'|'refresh'|'upgrade';mode?:'full'|'recent';runId?:string;anchor?:string;page?:number;pages?:number;processed?:number;refPage?:number;lockUntil?:number;lastRun?:string;lastOk?:string;lastError?:string;nextRecentAt?:number;manual?:boolean;scopeStart?:string;fails?:number;refreshCursor?:string;nextRefreshAt?:number};
 /** Creations before this Taipei date are history and are never back-filled; only newer work is synced. */
 export const SYNC_START='2026-10-28';
 const KEY='auto',BUDGET_MS=25000,RECENT_DAYS=3,INTERVAL_MS=10*60000;
@@ -49,8 +49,11 @@ export async function tick(){
         const page=a.page||1;
         const d=await syncBatch(OWNER,{...scope,page,anchor:a.anchor,runId:a.runId,serverRun:true});
         a.pages=d.sync.pagination.lastPage;a.processed=d.sync.processed;a.page=page+1;await put({...a,lockUntil:Date.now()+40000});
-        if(page>=d.sync.pagination.lastPage){a.phase='upgrade';break}
+        if(page>=d.sync.pagination.lastPage){a.phase=a.manual||Date.now()>=(a.nextRefreshAt||0)?'refresh':'upgrade';a.refreshCursor='';break}
       }
+    }
+    if(a.phase==='refresh'){
+      while(Date.now()<deadline){const u=await refreshUnassignedBatch(OWNER,a.refreshCursor);a.refreshCursor=u.cursor;await put({...a,lockUntil:Date.now()+40000});if(u.done){a.phase='upgrade';a.nextRefreshAt=Date.now()+3600000;break}}
     }
     if(a.phase==='upgrade'){
       while(Date.now()<deadline){const u=await upgradeBatch(OWNER);if(u.done||u.stalled){a.phase='idle';a.lastOk=new Date().toISOString();a.nextRecentAt=Date.now()+INTERVAL_MS;break}}
