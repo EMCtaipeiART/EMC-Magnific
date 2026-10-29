@@ -11,6 +11,7 @@ function AdminBar(){
   const running=st?.scheduler.running;
   useEffect(()=>{load();const t=setInterval(load,running?3000:20000);return()=>clearInterval(t)},[load,running]);
   async function post(path:string){await fetch(path,{method:'POST'});load()}
+  useEffect(()=>{document.documentElement.dataset.serverSync='1'},[]);
   useEffect(()=>{document.documentElement.dataset.readonly=st&&st.admin?'0':'1'},[st?.admin]);
   if(!st)return null;const s=st.scheduler;
   return <div className="admin-bar"><div className="admin-status">

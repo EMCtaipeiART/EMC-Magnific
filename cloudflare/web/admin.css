@@ -15,3 +15,5 @@ html[data-readonly="1"] [data-write]{display:none!important}
 .admin-status{flex:1 1 320px;min-width:0;flex-wrap:wrap;row-gap:2px;line-height:1.5}
 @media(max-width:1300px){.admin-bar{margin-left:215px}}
 @media(max-width:760px){.admin-bar{margin-left:0;position:static}}
+/* the server syncs on its own schedule; the browser-driven bulk sync is hidden here */
+html[data-server-sync] [data-sync]{display:none!important}

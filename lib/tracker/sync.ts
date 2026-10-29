@@ -57,7 +57,7 @@ export async function syncBatch(owner:string,b:any){
  for(const d of [start,end])if(d&&!/^\d{4}-\d{2}-\d{2}$/.test(d))throw new Error('同步日期格式不正確。');if(start&&end&&start>end)throw new Error('開始日期不能晚於結束日期。');
  if(!Number.isFinite(Date.parse(anchor))||Date.parse(anchor)>Date.now()+60000)throw new Error('同步快照時間無效。');
  const project=tidy(b.project,100),folder=tidy(b.folder,100);
- const runId=tidy(b.runId,100)||crypto.randomUUID();const history=await getState(owner,'syncLog',[]);const previous=history.find((entry:any)=>entry.runId===runId);if(page>1&&!previous)throw new Error('找不到上一批同步進度，請從第一批重新開始。');if(previous){if(page>previous.pagination.currentPage+1)throw new Error('同步批次不連續，請從已保存的下一批繼續。');for(const [key,value] of Object.entries({start,end,project,folder,anchor}))if(previous[key]!==value)throw new Error('同步範圍與已保存進度不同，請開始新的同步。');}
+ const runId=tidy(b.runId,100)||crypto.randomUUID();const history=await getState(owner,'syncLog',[]);const previous=history.find((entry:any)=>entry.runId===runId);if(page>1&&!previous&&!b.serverRun)throw new Error('找不到上一批同步進度，請從第一批重新開始。');if(previous){if(page>previous.pagination.currentPage+1)throw new Error('同步批次不連續，請從已保存的下一批繼續。');for(const [key,value] of Object.entries({start,end,project,folder,anchor}))if(previous[key]!==value)throw new Error('同步範圍與已保存進度不同，請開始新的同步。');}
  const args:any={from:folder?'folder':project?'project-root':'history',perPage:BATCH,page,full:false,orderBy:'created_at',orderDirection:'desc',excludeToolNames:UPLOAD_TOOLS};
  if(folder||project){args.reference=folder||project;args.includeSubfolders=true}
  if(start)args.dateStart=start+'T00:00:00+08:00';const endIso=end?new Date(end+'T23:59:59+08:00').toISOString():anchor;args.dateEnd=Date.parse(endIso)<Date.parse(anchor)?endIso:anchor;
