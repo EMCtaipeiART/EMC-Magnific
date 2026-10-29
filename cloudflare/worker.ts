@@ -68,7 +68,11 @@ export default {
     await initAuth(url.origin);
     if(path==='/api/tracker'){
       if(req.method==='POST'&&!admin)return json({error:'唯讀模式：只有管理員可以修改或同步。'},403);
-      if(req.method==='POST'){const r=await POST(req);if(r.ok)await bumpDataVersion();return r}
+      if(req.method==='POST'){
+        // Bulk re-reading from the browser is retired: the server syncs new work on its own schedule (see sync-job.ts).
+        const op=(await req.clone().json().catch(()=>({})) as any).op;
+        if(op==='sync'||op==='upgrade')return json({error:'同步已改由雲端自動進行（只讀取新紀錄），請重新整理頁面；需要立即同步請按頂端的「立即同步」。'},410);
+        const r=await POST(req);if(r.ok)await bumpDataVersion();return r}
       return url.searchParams.has('record')?GET(req):ledgerGet(req,url,ctx);
     }
     if(path==='/thumb'&&req.method==='GET'){return thumb(req,url,ctx)}
