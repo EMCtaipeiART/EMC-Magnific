@@ -87,6 +87,7 @@ export async function refreshUnassignedBatch(owner:string,cursor=''){
  const rows=await db().prepare("SELECT id FROM records WHERE owner=? AND id>? AND g_costProjectSource='unassigned' ORDER BY id LIMIT ?").bind(owner,cursor,BATCH).all();
  const ids=rows.results.map((r:any)=>String(r.id));if(!ids.length)return {done:true,cursor:'',count:0};
  const data=await providerRead('creations_get',{identifiers:ids}),raws=data.creations||data.items||[];
+ const hit=raws.find((r:any)=>r.identifier==='p8qS6XNehw');if(hit){const {metadata,...rest}=hit;await setState(owner,'debug',{at:new Date().toISOString(),rest});}
  const result=await enrich(owner,raws,[],false);
  return {done:ids.length<BATCH,cursor:ids.at(-1)!,count:result.records.length};
 }

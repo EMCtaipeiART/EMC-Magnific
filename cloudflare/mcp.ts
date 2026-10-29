@@ -34,6 +34,8 @@ function makeProvider():OAuthClientProvider{
 const transport=()=>new StreamableHTTPClientTransport(new URL(MCP_URL),{authProvider:makeProvider()});
 const newClient=()=>new Client({name:'emc-magnific-ledger',version:'1.0.0'});
 export async function startAuth():Promise<string>{
+  // A client registered under another origin (e.g. workers.dev) is rejected for this origin's callback: register again.
+  {const s=await load();const want=(s.origin||'')+'/auth/callback';if(s.clientInformation&&!(s.clientInformation.redirect_uris||[]).includes(want))await save({clientInformation:undefined})}
   pendingAuthUrl=null;const client=newClient();
   try{await client.connect(transport());await client.close();return (cache?.origin||'')+'/?connected=1'}
   catch(e){if(e instanceof UnauthorizedError&&pendingAuthUrl)return pendingAuthUrl;throw e}
