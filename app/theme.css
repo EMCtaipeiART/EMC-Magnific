@@ -1,12 +1,12 @@
 /* Professional theme layer (phase 1): neutral surfaces, blue actions, readable type.
    Loaded after globals.css so it overrides the older soft-green styling without touching component code. */
 :root{
-  --color-bg:#f1f5f9;--color-surface:#fff;--color-surface-subtle:#f8fafc;
-  --color-text:#111827;--color-text-muted:#475569;--color-border:#cbd5e1;--color-border-soft:#e2e8f0;--color-control-border:#64748b;
-  --color-primary:#1d4ed8;--color-primary-hover:#1e40af;--color-primary-soft:#eff6ff;--color-brand:#166534;
-  --color-success:#166534;--color-success-bg:#f0fdf4;--color-warning:#92400e;--color-warning-bg:#fffbeb;
-  --color-danger:#b91c1c;--color-danger-bg:#fef2f2;--color-info:#1e40af;--color-info-bg:#eff6ff;
-  --chart-1:#1d4ed8;--chart-2:#0f766e;--chart-3:#7c3aed;--chart-4:#b45309;--chart-5:#be185d;--chart-6:#475569;
+  --color-bg:#f3f5f2;--color-surface:#fff;--color-surface-subtle:#f8faf7;
+  --color-text:#14201a;--color-text-muted:#4b5a50;--color-border:#cfd8d1;--color-border-soft:#e3e9e4;--color-control-border:#66766b;
+  --color-primary:#2e6a50;--color-primary-hover:#27543f;--color-primary-soft:#edf5f0;--color-brand:#2e6a50;
+  --color-success:#2e6a50;--color-success-bg:#f0fdf4;--color-warning:#92400e;--color-warning-bg:#fffbeb;
+  --color-danger:#b91c1c;--color-danger-bg:#fef2f2;--color-info:#27543f;--color-info-bg:#edf5f0;
+  --chart-1:#2e6a50;--chart-2:#b45309;--chart-3:#7c3aed;--chart-4:#b45309;--chart-5:#be185d;--chart-6:#4b5a50;
   --radius-control:6px;--radius-card:8px;--radius-dialog:12px;
   --shadow-card:0 1px 2px rgb(15 23 42/4%);--shadow-overlay:0 16px 48px rgb(15 23 42/18%);
   --sidebar-width:224px;--control-height:40px;
@@ -77,14 +77,14 @@ td strong{font-weight:600;color:var(--color-text)}
 .table-wrap th{position:sticky;top:0;z-index:2}
 
 /* status colors */
-.badge{font-size:12px;padding:3px 8px;border-radius:var(--radius-control);font-weight:500;background:#f1f5f9;color:var(--color-text-muted)}
+.badge{font-size:12px;padding:3px 8px;border-radius:var(--radius-control);font-weight:500;background:#f3f5f2;color:var(--color-text-muted)}
 .badge.green{background:var(--color-success-bg);color:var(--color-success)}
 .badge.amber{background:var(--color-warning-bg);color:var(--color-warning)}
 .badge.blue{background:var(--color-info-bg);color:var(--color-info)}
 .badge.red{background:var(--color-danger-bg);color:var(--color-danger)}
-.badge.gray{background:#f1f5f9;color:var(--color-text-muted)}
-.notice{font-size:13px;line-height:1.6;border-radius:var(--radius-card);background:var(--color-info-bg);border-color:#bfdbfe;color:var(--color-info)}
-.notice.info{background:var(--color-info-bg);border-color:#bfdbfe;color:var(--color-info)}
+.badge.gray{background:#f3f5f2;color:var(--color-text-muted)}
+.notice{font-size:13px;line-height:1.6;border-radius:var(--radius-card);background:var(--color-info-bg);border-color:#c9dfd2;color:var(--color-info)}
+.notice.info{background:var(--color-info-bg);border-color:#c9dfd2;color:var(--color-info)}
 .notice.success{background:var(--color-success-bg);border-color:#bbf7d0;color:var(--color-success)}
 .notice.amber{background:var(--color-warning-bg);border-color:#fde68a;color:var(--color-warning)}
 .notice.error{background:var(--color-danger-bg);border-color:#fecaca;color:var(--color-danger)}
@@ -138,3 +138,8 @@ th{white-space:normal;vertical-align:bottom;line-height:1.4}
 .content{padding-left:24px;padding-right:24px}
 .topbar,.admin-bar{padding-left:24px;padding-right:24px}
 .record-title{max-width:220px}
+/* EMC green chart series: verified/platform points solid, rule-calculated points lighter */
+.bar-stack{background:#8fb8a2}
+.bar-stack>span{background:#8fb8a2}
+.bar-stack>span.actual{background:var(--chart-1)}
+.legend i,.legend .dot{background:var(--chart-1)}
