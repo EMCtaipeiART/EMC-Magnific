@@ -15,7 +15,7 @@ function AdminBar(){
   if(!st)return null;const s=st.scheduler;
   return <div className="admin-bar"><div className="admin-status">
     <span className={'dot '+(st.connected?(s.lastError?'warn':'ok'):'off')}/>
-    {!st.connected?'尚未連接 Magnific':s.running?`同步中… 第 ${s.page||0}${s.pages?` / ${s.pages}`:''} 批`:s.lastError?`同步失敗：${s.lastError}`:`上次自動同步：${fmt(s.lastOk)}`}<span className="muted">· 平日 08:00–20:00 每 10 分鐘自動掃描{s.inWindow?'':'（目前非掃描時段）'}</span>
+    {!st.connected?'尚未連接 Magnific':s.running?`同步中… 第 ${s.page||0}${s.pages?` / ${s.pages}`:''} 批${s.lastError?`（上次錯誤：${s.lastError}）`:''}`:s.lastError?`同步失敗：${s.lastError}`:`上次自動同步：${fmt(s.lastOk)}`}<span className="muted">· 平日 08:00–20:00 每 10 分鐘自動掃描{s.inWindow?'':'（目前非掃描時段）'}</span>
     {!st.admin&&<span className="muted">· 唯讀</span>}
   </div><div className="admin-actions">
     {st.admin?<>

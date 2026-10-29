@@ -8,7 +8,7 @@ import {isConnected} from './mcp';
 import {reclassifyAll} from './reclassify';
 import {inScanWindow} from './window';
 import {bumpDataVersion} from './data-version';
-type Auto={phase:'idle'|'ref'|'sync'|'upgrade';mode?:'full'|'recent';runId?:string;anchor?:string;page?:number;pages?:number;processed?:number;refPage?:number;lockUntil?:number;lastRun?:string;lastOk?:string;lastError?:string;nextRecentAt?:number;manual?:boolean;scopeStart?:string};
+type Auto={phase:'idle'|'ref'|'sync'|'upgrade';mode?:'full'|'recent';runId?:string;anchor?:string;page?:number;pages?:number;processed?:number;refPage?:number;lockUntil?:number;lastRun?:string;lastOk?:string;lastError?:string;nextRecentAt?:number;manual?:boolean;scopeStart?:string;fails?:number};
 /** Creations before this Taipei date are history and are never back-filled; only newer work is synced. */
 export const SYNC_START='2026-10-28';
 const KEY='auto',BUDGET_MS=25000,RECENT_DAYS=3,INTERVAL_MS=10*60000;
@@ -33,6 +33,7 @@ export async function tick(){
   if(a.phase!=='idle'&&a.scopeStart!==SYNC_START){await requestRun(a.mode||'full',!!a.manual);a=await getAuto()}
   await put({...a,lockUntil:now+BUDGET_MS+15000});
   const deadline=now+BUDGET_MS;
+  a.lastError=undefined;
   try{
     if(a.phase==='ref'){
       if((a.refPage||1)===1){const data=await providerRead('account_balance');if(data.credits){const at=new Date().toISOString();await setState(OWNER,'balance',{...data,at});const snaps=await getState(OWNER,'snapshots',[]);snaps.push({at,...data.credits});await setState(OWNER,'snapshots',snaps.slice(-500))}}
@@ -52,7 +53,15 @@ export async function tick(){
     }
   }catch(e:any){
     a.lastError=e instanceof ProviderError&&fatalProviderError(e)?e.message:String(e?.message||e).slice(0,300);console.error('[sync]',a.lastError);
-    if(e instanceof ProviderError&&fatalProviderError(e)){a.phase='idle';a.nextRecentAt=Date.now()+INTERVAL_MS}
+    if(e instanceof ProviderError&&fatalProviderError(e)){a.phase='idle';a.nextRecentAt=Date.now()+INTERVAL_MS;a.fails=0}
+    else{
+      // A run whose saved progress was lost (or that keeps failing) must not retry the same page forever: start it over.
+      a.fails=(a.fails||0)+1;
+      if(a.fails>=3||/找不到上一批|同步批次不連續|同步範圍與已保存進度不同/.test(a.lastError||'')){
+        const error=a.lastError;await requestRun(a.mode||'recent',!!a.manual);const next=await getAuto();next.lastError=error;next.fails=0;await put(next);await bumpDataVersion();return;
+      }
+    }
   }
+  if(!a.lastError)a.fails=0;
   a.lockUntil=0;await put(a);await bumpDataVersion();
 }
