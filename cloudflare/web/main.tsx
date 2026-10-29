@@ -2,6 +2,7 @@ import React,{useCallback,useEffect,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import Dashboard from '@/app/tracker-dashboard';
 import '@/app/globals.css';
+import '@/app/theme.css';
 import './admin.css';
 type Status={admin:boolean;connected:boolean;scheduler:{inWindow?:boolean;running:boolean;mode?:string;lastOk?:string;lastError?:string;page?:number;pages?:number;processed?:number}};
 const fmt=(s?:string)=>s?new Date(s).toLocaleString('zh-TW',{hour12:false}):'尚未同步';

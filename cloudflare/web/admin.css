@@ -11,9 +11,8 @@
 .admin-modal button{font:inherit;padding:6px 14px;border:1px solid #bbb;border-radius:6px;background:#fff;cursor:pointer}
 html[data-readonly="1"] [data-write]{display:none!important}
 /* keep the bar clear of the fixed sidebar (widths mirror app/globals.css) */
-.admin-bar{position:sticky;top:0;z-index:6;margin-left:244px;min-height:46px}
+.admin-bar{position:sticky;top:0;z-index:6;min-height:48px}
 .admin-status{flex:1 1 320px;min-width:0;flex-wrap:wrap;row-gap:2px;line-height:1.5}
-@media(max-width:1300px){.admin-bar{margin-left:215px}}
-@media(max-width:760px){.admin-bar{margin-left:0;position:static}}
+@media(max-width:760px){.admin-bar{position:static}}
 /* the server syncs on its own schedule; the browser-driven bulk sync is hidden here */
 html[data-server-sync] [data-sync]{display:none!important}

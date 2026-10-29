@@ -1,0 +1,140 @@
+/* Professional theme layer (phase 1): neutral surfaces, blue actions, readable type.
+   Loaded after globals.css so it overrides the older soft-green styling without touching component code. */
+:root{
+  --color-bg:#f1f5f9;--color-surface:#fff;--color-surface-subtle:#f8fafc;
+  --color-text:#111827;--color-text-muted:#475569;--color-border:#cbd5e1;--color-border-soft:#e2e8f0;--color-control-border:#64748b;
+  --color-primary:#1d4ed8;--color-primary-hover:#1e40af;--color-primary-soft:#eff6ff;--color-brand:#166534;
+  --color-success:#166534;--color-success-bg:#f0fdf4;--color-warning:#92400e;--color-warning-bg:#fffbeb;
+  --color-danger:#b91c1c;--color-danger-bg:#fef2f2;--color-info:#1e40af;--color-info-bg:#eff6ff;
+  --chart-1:#1d4ed8;--chart-2:#0f766e;--chart-3:#7c3aed;--chart-4:#b45309;--chart-5:#be185d;--chart-6:#475569;
+  --radius-control:6px;--radius-card:8px;--radius-dialog:12px;
+  --shadow-card:0 1px 2px rgb(15 23 42/4%);--shadow-overlay:0 16px 48px rgb(15 23 42/18%);
+  --sidebar-width:224px;--control-height:40px;
+  /* legacy variable names used across globals.css */
+  --ink:var(--color-text);--green:var(--color-brand);--line:var(--color-border);--muted:var(--color-text-muted);
+  --bg:var(--color-bg);--soft:var(--color-primary-soft);--amber:var(--color-warning);--blue:var(--color-primary);
+}
+body{font-size:14px;line-height:1.5;color:var(--color-text);background:var(--color-bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3{color:var(--color-text);letter-spacing:0}
+h1{font-size:24px;font-weight:600;line-height:1.3}
+h2{font-size:16px;font-weight:600}
+small{font-size:12px}
+:focus-visible{outline:2px solid var(--color-primary);outline-offset:2px}
+
+/* layout */
+.sidebar{width:var(--sidebar-width);padding:24px 16px;background:var(--color-surface);border-right:1px solid var(--color-border-soft)}
+main{margin-left:var(--sidebar-width);width:calc(100% - var(--sidebar-width))}
+.content{padding:28px 32px 24px;max-width:1600px}
+.topbar{height:52px;padding:0 32px;background:var(--color-surface);border-bottom:1px solid var(--color-border-soft);color:var(--color-text-muted);font-size:13px}
+.workspace{margin:24px 0;padding:12px;background:var(--color-surface-subtle);border:1px solid var(--color-border-soft);border-radius:var(--radius-card);font-size:12px;color:var(--color-text)}
+.brand{font-size:22px;letter-spacing:0}
+.brand small{font-size:10px;color:var(--color-text-muted);letter-spacing:1px}
+.sidebar nav button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 12px;font-size:14px;font-weight:500;color:var(--color-text-muted);border-radius:var(--radius-control);white-space:nowrap}
+.sidebar nav button svg{width:18px;height:18px}
+.sidebar nav button:hover{background:var(--color-surface-subtle);color:var(--color-text)}
+.sidebar nav button.active{background:var(--color-primary-soft);color:var(--color-primary);box-shadow:inset 3px 0 var(--color-primary);font-weight:600}
+.nav-dot{display:none}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--color-text-muted);font-weight:600}
+.page-heading{margin-bottom:24px}
+.page-heading p{font-size:14px;line-height:1.6;color:var(--color-text-muted)}
+.account-strip{font-size:12px;color:var(--color-text-muted)}
+
+/* surfaces */
+.panel,.metric{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
+.metric{padding:20px}
+.hero-metric{background:var(--color-surface);border-top:3px solid var(--color-primary)}
+.metric-number{font-size:clamp(24px,2.2vw,32px);font-weight:600;letter-spacing:0;font-variant-numeric:tabular-nums lining-nums;color:var(--color-text)}
+.metric p,.metric small,.metric-footer{font-size:12px;color:var(--color-text-muted)}
+.metric-grid{gap:16px}
+
+/* controls */
+.button{min-height:var(--control-height);padding:0 16px;font-size:14px;font-weight:500;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-control-border);border-radius:var(--radius-control);box-shadow:none}
+.button:hover{background:var(--color-surface-subtle)}
+.button.small{min-height:32px;padding:0 12px;font-size:13px}
+.button.primary{background:var(--color-primary);border-color:var(--color-primary);color:#fff;box-shadow:none}
+.button.primary:hover{background:var(--color-primary-hover);border-color:var(--color-primary-hover)}
+.button:disabled{opacity:.5}
+.text-button{font-size:13px;color:var(--color-primary);font-weight:500}
+.icon-button{min-width:32px;min-height:32px}
+select,.filter-grid input,form input[type=text],form input[type=number],form input[type=date],form input[type=password],form textarea{height:var(--control-height);padding:0 12px;font-size:14px;color:var(--color-text);background:var(--color-surface);border:1px solid var(--color-control-border);border-radius:var(--radius-control)}
+form textarea{height:auto;padding:10px 12px;line-height:1.5}
+select{padding-right:28px}
+label{font-size:13px;font-weight:500;color:var(--color-text)}
+.filters-panel,.filter-grid label{color:var(--color-text)}
+.filters-panel h2{font-size:16px}
+
+/* tables */
+th{font-size:12px;font-weight:600;color:var(--color-text-muted);background:var(--color-surface-subtle);border-top:1px solid var(--color-border-soft);border-bottom:1px solid var(--color-border);padding:12px 16px;text-align:left;white-space:nowrap}
+td{font-size:13px;color:var(--color-text);padding:14px 16px;border-bottom:1px solid var(--color-border-soft);font-variant-numeric:tabular-nums lining-nums}
+td small,td .attribution-label{font-size:12px;color:var(--color-text-muted)}
+tbody tr:hover td{background:var(--color-surface-subtle)}
+td strong{font-weight:600;color:var(--color-text)}
+.row-link{color:var(--color-text)}
+.row-link:hover strong{color:var(--color-primary)}
+.thumb{width:40px;height:40px;border-radius:var(--radius-control)}
+.table-wrap{overflow:auto;max-height:min(70dvh,780px)}
+.table-wrap table{border-collapse:separate;border-spacing:0}
+.table-wrap th{position:sticky;top:0;z-index:2}
+
+/* status colors */
+.badge{font-size:12px;padding:3px 8px;border-radius:var(--radius-control);font-weight:500;background:#f1f5f9;color:var(--color-text-muted)}
+.badge.green{background:var(--color-success-bg);color:var(--color-success)}
+.badge.amber{background:var(--color-warning-bg);color:var(--color-warning)}
+.badge.blue{background:var(--color-info-bg);color:var(--color-info)}
+.badge.red{background:var(--color-danger-bg);color:var(--color-danger)}
+.badge.gray{background:#f1f5f9;color:var(--color-text-muted)}
+.notice{font-size:13px;line-height:1.6;border-radius:var(--radius-card);background:var(--color-info-bg);border-color:#bfdbfe;color:var(--color-info)}
+.notice.info{background:var(--color-info-bg);border-color:#bfdbfe;color:var(--color-info)}
+.notice.success{background:var(--color-success-bg);border-color:#bbf7d0;color:var(--color-success)}
+.notice.amber{background:var(--color-warning-bg);border-color:#fde68a;color:var(--color-warning)}
+.notice.error{background:var(--color-danger-bg);border-color:#fecaca;color:var(--color-danger)}
+
+/* charts and drawer */
+.legend{font-size:12px;color:var(--color-text-muted)}
+.bar-stack{filter:none;background:var(--chart-1)}
+.record-drawer{background:var(--color-surface);box-shadow:var(--shadow-overlay);border-left:1px solid var(--color-border)}
+.drawer-header{background:var(--color-surface);border-bottom:1px solid var(--color-border-soft)}
+.drawer-content{padding:24px}
+.empty{color:var(--color-text-muted)}
+
+/* admin bar (cloudflare edition) */
+.admin-bar{background:var(--color-surface-subtle);border-bottom:1px solid var(--color-border-soft);color:var(--color-text);margin-left:var(--sidebar-width);padding:8px 32px}
+.admin-status .muted{color:var(--color-text-muted)}
+.admin-bar button,.admin-bar a{border-color:var(--color-control-border);color:var(--color-text)}
+.admin-bar .primary,.admin-modal .primary{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
+
+@media(max-width:1050px){.content{padding:24px}.topbar{padding:0 24px}.admin-bar{padding:8px 24px}}
+@media(max-width:760px){
+  .sidebar{position:static;width:100%;padding:16px;border-right:0;border-bottom:1px solid var(--color-border-soft)}
+  main,.admin-bar{margin-left:0;width:100%}
+  .content{padding:16px}.topbar{padding:0 16px}.admin-bar{padding:8px 16px}
+  select,.filter-grid input,form input[type=text],form input[type=number],form input[type=date],form input[type=password]{font-size:16px}
+  h1{font-size:22px}
+}
+
+/* readability floor: nothing the user has to read renders below 12px (the legacy sheet used 8–11px in many places) */
+small,option,.sidebar p,.sidebar-bottom *,.sidebar-account div,.topbar span,.account-strip,.account-strip *,.quick-dates button,.filter-bottom,.filter-bottom *,
+.scope-summary,.scope-summary *,.completeness-note,.completeness-note *,.chart-axis span,.table-footer span,.pagination span,.method-note,.method-note *,
+.panel p,.panel-heading p,.page-heading p,.side-status,.nav-label,.count,.rank-number,.text-button,.attribution-label,.field-hint,.metric p{font-size:12px!important;line-height:1.6}
+.account-strip strong{font-size:13px!important}
+.avatar{font-size:11px!important}
+.sidebar p.nav-label{letter-spacing:.06em;color:var(--color-text-muted)}
+.quick-dates button.selected{background:var(--color-primary-soft);color:var(--color-primary);font-weight:600}
+.quick-dates button{color:var(--color-text-muted)}
+.page-heading p{font-size:14px!important}
+.brand small,.brand small *,.sidebar .brand span,.sidebar-tagline,.sidebar-tagline *,.metric strong{font-size:12px!important}
+.metric strong{font-size:13px!important}
+.sidebar span,.sidebar div,.sidebar-bottom span{font-size:max(12px,1em)}
+.sidebar-account .avatar{font-size:12px!important}
+/* keep the 9-column records table inside a 1440px window */
+th,td{padding-left:12px;padding-right:12px}
+.record-title{min-width:220px;max-width:280px}
+.records-table .model-slug,td .model-slug{word-break:break-all}
+.workspace{padding:10px 12px}
+th{white-space:normal;vertical-align:bottom;line-height:1.4}
+.record-title{min-width:200px;max-width:230px}
+.records-table td:nth-child(3),.records-table th:nth-child(3){max-width:170px}
+.records-table td:last-child,.records-table th:last-child{width:44px;padding-left:4px;padding-right:8px}
+.content{padding-left:24px;padding-right:24px}
+.topbar,.admin-bar{padding-left:24px;padding-right:24px}
+.record-title{max-width:220px}
