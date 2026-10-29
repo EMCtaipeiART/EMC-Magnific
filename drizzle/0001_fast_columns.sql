@@ -1,0 +1,24 @@
+-- Virtual columns over the JSON record plus one covering index: aggregates and filters read the index instead of parsing every record.
+ALTER TABLE records ADD COLUMN g_tool GENERATED ALWAYS AS (json_extract(data,'$.tool')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_duration GENERATED ALWAYS AS (json_extract(data,'$.duration')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_credits GENERATED ALWAYS AS (json_extract(data,'$.credits')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_createdAt GENERATED ALWAYS AS (json_extract(data,'$.createdAt')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_model GENERATED ALWAYS AS (json_extract(data,'$.model')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_version GENERATED ALWAYS AS (json_extract(data,'$.version')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_status GENERATED ALWAYS AS (json_extract(data,'$.status')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_resolution GENERATED ALWAYS AS (json_extract(data,'$.resolution')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_quote_min GENERATED ALWAYS AS (json_extract(data,'$.quote.range.min')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_quote_max GENERATED ALWAYS AS (json_extract(data,'$.quote.range.max')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_project GENERATED ALWAYS AS (json_extract(data,'$.project')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_person GENERATED ALWAYS AS (json_extract(data,'$.person')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_modelSlug GENERATED ALWAYS AS (json_extract(data,'$.modelSlug')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_modelName GENERATED ALWAYS AS (json_extract(data,'$.modelName')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_kind GENERATED ALWAYS AS (json_extract(data,'$.kind')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_day GENERATED ALWAYS AS (json_extract(data,'$.day')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_creditSource GENERATED ALWAYS AS (json_extract(data,'$.creditSource')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_costProjectSource GENERATED ALWAYS AS (json_extract(data,'$.costProjectSource')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_costProject GENERATED ALWAYS AS (json_extract(data,'$.costProject')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_author GENERATED ALWAYS AS (json_extract(data,'$.author')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_actualDuration GENERATED ALWAYS AS (json_extract(data,'$.actualDuration')) VIRTUAL;
+ALTER TABLE records ADD COLUMN g_folder GENERATED ALWAYS AS (json_extract(data,'$.folder')) VIRTUAL;
+CREATE INDEX idx_records_fast ON records(owner, g_day, g_person, g_costProject, g_project, g_kind, g_creditSource, g_status, g_credits, g_duration, g_modelSlug, g_modelName, g_model, g_tool, g_resolution, g_author, g_version, g_costProjectSource, g_quote_min, g_quote_max, g_createdAt, g_folder, g_actualDuration);
